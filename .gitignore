@@ -2,3 +2,5 @@ TAGS
 *.hi
 *.o
 example
+generate
+other.md
