@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Andreas Pauley" />
+  <meta name="date" content="2016-07-11" />
+  <title>Haskell Shell Scripting with Turtle</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Haskell Shell Scripting with Turtle</h1>
+  <p class="author">
+<a href="http://www.meetup.com/lambda-luminaries/events/231686085/">Andreas Pauley</a>
+  </p>
+  <p class="date">July 11, 2016</p>
+</div>
+<div id="what-is-turtle" class="slide section level1">
+<h1>What is Turtle?</h1>
+<blockquote>
+<p>“Turtle is a reimplementation of the Unix command line environment in Haskell so that you can use Haskell as a scripting language or a shell. Think of <code>turtle</code> as <code>coreutils</code> embedded within the Haskell language.”</p>
+<p>— <a href="https://github.com/Gabriel439/Haskell-Turtle-Library" class="uri">https://github.com/Gabriel439/Haskell-Turtle-Library</a></p>
+</blockquote>
+<ul>
+<li>Written by <a href="http://haskellforall.com/">Gabriel Gonzalez</a></li>
+<li>Essentially a re-design of <a href="https://github.com/yesodweb/Shelly.hs">Shelly</a></li>
+</ul>
+</div>
+<div id="features" class="slide section level1">
+<h1>Features</h1>
+<ul>
+<li><p><em>Batteries included:</em> Command an extended suite of predefined utilities</p></li>
+<li><p><em>Interoperability:</em> You can still run external shell commands</p></li>
+<li><p><em>Portability:</em> Works on Windows, OS X, and Linux</p></li>
+<li><p><em>Exception safety:</em> Safely acquire and release resources</p></li>
+<li><p><em>Streaming:</em> Transform or fold command output in constant space</p></li>
+<li><p><em>Patterns:</em> Use typed regular expressions that can parse structured values</p></li>
+<li><p><em>Formatting:</em> Type-safe <code>printf</code>-style text formatting</p></li>
+<li><p><em>Modern:</em> Supports <code>text</code> and <code>system-filepath</code></p></li>
+</ul>
+</div>
+<div id="haskell-for-shell-scripting-why" class="slide section level1">
+<h1>Haskell for Shell Scripting? Why?</h1>
+<ul>
+<li>A high-level language that can compile to command-line executables.</li>
+<li>Scripts can also be interpreted if you don't want to compile them.</li>
+<li>Bringing the awesomeness of typed functional programming to your scripts</li>
+</ul>
+</div>
+<div id="installing-turtle" class="slide section level1">
+<h1>Installing Turtle</h1>
+<p>From outside an existing Haskell project directory:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> setup
+<span class="kw">...</span>
+$ <span class="kw">stack</span> install turtle
+<span class="kw">...</span>
+$ <span class="kw">stack</span> ghci turtle
+<span class="kw">...</span>
+<span class="kw">Prelude&gt;</span> :set -XOverloadedStrings
+<span class="kw">Prelude&gt;</span> import Turtle
+<span class="kw">Prelude</span> Turtle<span class="kw">&gt;</span> echo <span class="st">&quot;Hello, world!&quot;</span>
+<span class="kw">Hello</span>, world!<span class="st">&quot;</span></code></pre></div>
+<p>Making Turtle part of a Haskell project:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> new my-command-line-executable</code></pre></div>
+<p>And add <code>turtle</code> as a dependency to cabal/stack.</p>
+</div>
+<div id="hello-world" class="slide section level1">
+<h1>Hello, world!</h1>
+<p>Save this to <code>example.hs</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="st">#!/usr/bin/env stack</span>
+<span class="co">-- stack --install-ghc runghc --package turtle</span>
+                                    <span class="co">-- #!/bin/bash</span>
+<span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>  <span class="fu">--</span>
+                                    <span class="fu">--</span>
+<span class="kw">import </span><span class="dt">Turtle</span>                       --
+                                    <span class="fu">--</span>
+main <span class="fu">=</span> echo <span class="st">&quot;Hello, world!&quot;</span>         <span class="co">-- echo Hello, world!</span></code></pre></div>
+<p>... then run the example script:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">chmod</span> u+x example.hs
+$ <span class="kw">time</span> ./example.hs 
+<span class="kw">Hello</span>, world!
+
+<span class="kw">real</span>    0m1.355s
+<span class="kw">user</span>    0m0.993s
+<span class="kw">sys</span> 0m0.282s</code></pre></div>
+</div>
+<div id="or-create-a-native-binary" class="slide section level1">
+<h1>Or create a native binary</h1>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> ghc -- -O2 example.hs
+$ <span class="kw">time</span> ./example
+<span class="kw">Hello</span>, world!
+
+<span class="kw">real</span>    0m0.006s
+<span class="kw">user</span>    0m0.002s
+<span class="kw">sys</span> 0m0.003s</code></pre></div>
+</div>
+</body>
+</html>
