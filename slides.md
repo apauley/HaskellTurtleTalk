@@ -326,3 +326,68 @@ ghc-mod$ git branch --list
 ghc-mod$ git branch 2>/dev/null | grep '\*' | cut -d'*' -f2-|sed -e 's/^\s*//g'
 master
 ```
+
+# Executing Arbitrary Commands
+
+ * When built-in functions don't cut it anymore
+
+There are two main categories of functions here:
+
+## 1. Those with the word `shell`, e.g. `shellStrict`
+
+```haskell
+shellStrict
+:: MonadIO io
+=> Text	               -- Command line
+-> Shell Text          -- Lines of standard input
+-> io (ExitCode, Text) -- Exit code and stdout
+```
+
+## 2. Those with the word `proc`, e.g. `inprocWithErr`
+
+```haskell
+inprocWithErr
+:: Text                     -- Command
+-> [Text]                   -- Arguments
+-> Shell Text               -- Lines of standard input
+-> Shell (Either Text Text)	-- Lines of either standard output (Right) or standard error (Left)
+```
+
+The `proc`-style functions are safer, the `shell`-style functions are more powerful.
+
+# shell and family
+
+More powerful, but less safe.
+You can include any shell command, with shell pipes etc:
+
+```haskell
+Prelude Turtle> shell "cat /etc/hosts|grep 127.0.0.1.*localhost" empty
+127.0.0.1	localhost
+ExitSuccess
+Prelude Turtle> shell "cat /etc/hosts|grep NASA" empty
+ExitFailure 1
+```
+
+```haskell
+  let cmd = "cat dependency-check-report.xml|grep '<severity>.*</severity>'|cut -d'>' -f2|cut -d'<' -f1|sort|uniq"
+  (exitCode, output) <- shellStrict cmd empty
+```
+
+# proc and family
+
+Safer, but less powerful.
+You supply arguments as a list of `Text`:
+
+```haskell
+exitCode <- proc "pandoc" ["-t", "slidy", "-s", "slides.md", "-o", "slides.html"] empty
+```
+
+```haskell
+Prelude Turtle> let procEither = inprocWithErr "git" ["status", "--short"] empty
+Prelude Turtle> stdout $ fmap (either (format ("turtle-err: "%s)) (format ("turtle-out: "%s))) shellEither
+turtle-out:  M slides.html
+turtle-out: MM slides.md
+Prelude Turtle> cd "/tmp"
+Prelude Turtle> stdout $ fmap (either (format ("turtle-err: "%s)) (format ("turtle-out: "%s))) shellEither
+turtle-err: fatal: Not a git repository (or any of the parent directories): .git
+```
