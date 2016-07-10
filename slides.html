@@ -292,7 +292,7 @@ master</code></pre></div>
 <p>There are two main categories of functions here:</p>
 <h2 id="those-with-the-word-shell-e.g.-shellstrict">1. Those with the word <code>shell</code>, e.g. <code>shellStrict</code></h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">shellStrict
-<span class="ot">::</span> <span class="dt">MonadIO</span> io    
+<span class="ot">::</span> <span class="dt">MonadIO</span> io
 <span class="ot">=&gt;</span> <span class="dt">Text</span>                <span class="co">-- Command line</span>
 <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span>          <span class="co">-- Lines of standard input</span>
 <span class="ot">-&gt;</span> io (<span class="dt">ExitCode</span>, <span class="dt">Text</span>) <span class="co">-- Exit code and stdout</span></code></pre></div>
@@ -326,6 +326,20 @@ turtle<span class="fu">-</span>out<span class="fu">:</span> <span class="dt">MM<
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> cd <span class="st">&quot;/tmp&quot;</span>
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> stdout <span class="fu">$</span> fmap (either (format (<span class="st">&quot;turtle-err: &quot;</span><span class="fu">%</span>s)) (format (<span class="st">&quot;turtle-out: &quot;</span><span class="fu">%</span>s))) shellEither
 turtle<span class="fu">-</span>err<span class="fu">:</span> fatal<span class="fu">:</span> <span class="dt">Not</span> a git repository (or any <span class="kw">of</span> the parent directories)<span class="fu">:</span> <span class="fu">.</span>git</code></pre></div>
+</div>
+<div id="string-formatting" class="slide section level1">
+<h1>String Formatting</h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d) cmd n</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d)
+format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d)<span class="ot"> ::</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Text</span></code></pre></div>
+<h2 id="formatting-filepath">Formatting FilePath</h2>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> pwd
+FilePath <span class="st">&quot;/bin&quot;</span>
+<span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> myDir <span class="ot">&lt;-</span> pwd
+<span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp) myDir
+<span class="st">&quot;Your current directory is /bin&quot;</span>
+<span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span>t format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)
+format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)<span class="ot"> ::</span> <span class="dt">Turtle.FilePath</span> <span class="ot">-&gt;</span> <span class="dt">Text</span></code></pre></div>
 </div>
 </body>
 </html>

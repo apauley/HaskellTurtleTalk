@@ -391,3 +391,26 @@ Prelude Turtle> cd "/tmp"
 Prelude Turtle> stdout $ fmap (either (format ("turtle-err: "%s)) (format ("turtle-out: "%s))) shellEither
 turtle-err: fatal: Not a git repository (or any of the parent directories): .git
 ```
+
+# String Formatting
+
+```haskell
+format (s%" failed with exit code: "%d) cmd n
+```
+
+```haskell
+Prelude Turtle> :type format (s%" failed with exit code: "%d)
+format (s%" failed with exit code: "%d) :: Text -> Int -> Text
+```
+
+## Formatting FilePath
+
+```haskell
+Prelude Turtle> pwd
+FilePath "/bin"
+Prelude Turtle> myDir <- pwd
+Prelude Turtle> format ("Your current directory is "%fp) myDir
+"Your current directory is /bin"
+Prelude Turtle> :t format ("Your current directory is "%fp)
+format ("Your current directory is "%fp) :: Turtle.FilePath -> Text
+```
