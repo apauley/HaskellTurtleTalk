@@ -414,3 +414,13 @@ Prelude Turtle> format ("Your current directory is "%fp) myDir
 Prelude Turtle> :t format ("Your current directory is "%fp)
 format ("Your current directory is "%fp) :: Turtle.FilePath -> Text
 ```
+
+# Resources
+
+The Turtle Tutorial:
+
+[https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html](https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html)
+
+The GitHub Repository:
+
+[https://github.com/Gabriel439/Haskell-Turtle-Library](https://github.com/Gabriel439/Haskell-Turtle-Library)
