@@ -199,3 +199,130 @@ Available options:
   PROJECT                  The project name to be displayed in the report
   DIR                      A directory with files to check
 ```
+
+# Built-in functions
+
+Turtle supplies a whole lot of typed Haskell equivalents for the usual Unix utilities.
+
+Examples include:
+
+echo, env, cd, pwd, mv, cp, rm, date, touch, sleep, exit, ls, grep, sed, find etc.
+
+Have a look at [Turtle-Prelude](https://hackage.haskell.org/package/turtle-1.2.8/docs/Turtle-Prelude.html) for more details.
+
+# Turtle Types: Text
+
+No `String`, just `Data.Text`
+
+```haskell
+echo :: MonadIO io => Text -> io ()
+-- Print to stdout
+```
+
+Example:
+
+```haskell
+Prelude Turtle> echo "Hello, Turtle"
+Hello, Turtle
+```
+
+# Turtle Types: FilePath
+
+Turtle uses [system-filepath](https://hackage.haskell.org/package/system-filepath),
+not the [filepath used by Prelude](https://hackage.haskell.org/package/filepath-1.4.1.0/docs/System-FilePath-Posix.html#t:FilePath)
+which is essentially just a `String`.
+
+Unfortunately it seems that the latest maintainer of `system-filepath` has
+[deprecated](https://plus.google.com/+MichaelSnoyman/posts/Ft5hnPqpgEx) the package, although I didn't see any indication that Turtle will stop using it.
+
+```haskell
+cd :: MonadIO io => FilePath -> io ()
+-- Change the current directory
+```
+
+```haskell
+pwd :: MonadIO io => io FilePath
+-- Get the current directory
+```
+
+```haskell
+rm :: MonadIO io => FilePath -> io ()
+-- Remove a file
+```
+
+Example:
+
+```haskell
+Prelude Turtle> cd "/tmp"
+Prelude Turtle> pwd
+FilePath "/tmp"
+```
+
+# Turtle Types: The Shell Monad
+
+```haskell
+newtype Shell a
+-- A (Shell a) is a protected stream of a's with side effects
+```
+
+```haskell
+ls :: FilePath -> Shell FilePath
+-- Stream all immediate children of the given directory, excluding "." and ".."
+```
+
+```haskell
+input :: FilePath -> Shell Text
+-- Read lines of Text from a file
+```
+
+```haskell
+output :: MonadIO io => FilePath -> Shell Text -> io ()
+-- Stream lines of Text to a file
+```
+
+Example:
+
+```haskell
+Prelude Turtle> output "/tmp/turtle" ("Hello" <|> "Turtle")
+Prelude Turtle> stdout $ input "/tmp/turtle"
+Hello
+Turtle
+```
+
+# Turtle Types: Pattern
+
+```haskell
+grep :: Pattern a -> Shell Text -> Shell Text
+-- Keep all lines that match the given Pattern
+```
+
+```haskell
+sed :: Pattern Text -> Shell Text -> Shell Text
+-- Replace all occurrences of a Pattern with its Text result
+```
+
+```haskell
+find :: Pattern a -> FilePath -> Shell FilePath
+-- Search a directory recursively for all files matching the given Pattern
+```
+
+Example:
+
+```haskell
+currentBranch :: Shell Text
+currentBranch = do
+  sed ("* " *> return "") $ grep (prefix "*") (git "branch" ["--list"])
+```
+
+```haskell
+*Main GitHellLib> stdout currentBranch
+master
+```
+
+```bash
+ghc-mod$ git branch --list
+  ghc-8
+* master
+ghc-mod$ git branch 2>/dev/null | grep '\*' | cut -d'*' -f2-|sed -e 's/^\s*//g'
+master
+```

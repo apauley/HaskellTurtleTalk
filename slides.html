@@ -217,5 +217,72 @@ parser <span class="fu">=</span> fmap <span class="dt">PSGrep</span> (subcommand
   <span class="kw">PROJECT</span>                  The project name to be displayed in the report
   <span class="kw">DIR</span>                      A directory with files to check</code></pre></div>
 </div>
+<div id="built-in-functions" class="slide section level1">
+<h1>Built-in functions</h1>
+<p>Turtle supplies a whole lot of typed Haskell equivalents for the usual Unix utilities.</p>
+<p>Examples include:</p>
+<p>echo, env, cd, pwd, mv, cp, rm, date, touch, sleep, exit, ls, grep, sed, find etc.</p>
+<p>Have a look at <a href="https://hackage.haskell.org/package/turtle-1.2.8/docs/Turtle-Prelude.html">Turtle-Prelude</a> for more details.</p>
+</div>
+<div id="turtle-types-text" class="slide section level1">
+<h1>Turtle Types: Text</h1>
+<p>No <code>String</code>, just <code>Data.Text</code></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">echo ::</span> <span class="dt">MonadIO</span> io <span class="ot">=&gt;</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> io ()
+<span class="co">-- Print to stdout</span></code></pre></div>
+<p>Example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> echo <span class="st">&quot;Hello, Turtle&quot;</span>
+<span class="dt">Hello</span>, <span class="dt">Turtle</span></code></pre></div>
+</div>
+<div id="turtle-types-filepath" class="slide section level1">
+<h1>Turtle Types: FilePath</h1>
+<p>Turtle uses <a href="https://hackage.haskell.org/package/system-filepath">system-filepath</a>, not the <a href="https://hackage.haskell.org/package/filepath-1.4.1.0/docs/System-FilePath-Posix.html#t:FilePath">filepath used by Prelude</a> which is essentially just a <code>String</code>.</p>
+<p>Unfortunately it seems that the latest maintainer of <code>system-filepath</code> has <a href="https://plus.google.com/+MichaelSnoyman/posts/Ft5hnPqpgEx">deprecated</a> the package, although I didn't see any indication that Turtle will stop using it.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">cd ::</span> <span class="dt">MonadIO</span> io <span class="ot">=&gt;</span> FilePath <span class="ot">-&gt;</span> io ()
+<span class="co">-- Change the current directory</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">pwd ::</span> <span class="dt">MonadIO</span> io <span class="ot">=&gt;</span> io FilePath
+<span class="co">-- Get the current directory</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">rm ::</span> <span class="dt">MonadIO</span> io <span class="ot">=&gt;</span> FilePath <span class="ot">-&gt;</span> io ()
+<span class="co">-- Remove a file</span></code></pre></div>
+<p>Example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> cd <span class="st">&quot;/tmp&quot;</span>
+<span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> pwd
+FilePath <span class="st">&quot;/tmp&quot;</span></code></pre></div>
+</div>
+<div id="turtle-types-the-shell-monad" class="slide section level1">
+<h1>Turtle Types: The Shell Monad</h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Shell</span> a
+<span class="co">-- A (Shell a) is a protected stream of a's with side effects</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">ls ::</span> FilePath <span class="ot">-&gt;</span> <span class="dt">Shell</span> FilePath
+<span class="co">-- Stream all immediate children of the given directory, excluding &quot;.&quot; and &quot;..&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">input ::</span> FilePath <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span>
+<span class="co">-- Read lines of Text from a file</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">output ::</span> <span class="dt">MonadIO</span> io <span class="ot">=&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> io ()
+<span class="co">-- Stream lines of Text to a file</span></code></pre></div>
+<p>Example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> output <span class="st">&quot;/tmp/turtle&quot;</span> (<span class="st">&quot;Hello&quot;</span> <span class="fu">&lt;|&gt;</span> <span class="st">&quot;Turtle&quot;</span>)
+<span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> stdout <span class="fu">$</span> input <span class="st">&quot;/tmp/turtle&quot;</span>
+<span class="dt">Hello</span>
+<span class="dt">Turtle</span></code></pre></div>
+</div>
+<div id="turtle-types-pattern" class="slide section level1">
+<h1>Turtle Types: Pattern</h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">grep ::</span> <span class="dt">Pattern</span> a <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span>
+<span class="co">-- Keep all lines that match the given Pattern</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">sed ::</span> <span class="dt">Pattern</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span>
+<span class="co">-- Replace all occurrences of a Pattern with its Text result</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">find ::</span> <span class="dt">Pattern</span> a <span class="ot">-&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">Shell</span> FilePath
+<span class="co">-- Search a directory recursively for all files matching the given Pattern</span></code></pre></div>
+<p>Example:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">currentBranch ::</span> <span class="dt">Shell</span> <span class="dt">Text</span>
+currentBranch <span class="fu">=</span> <span class="kw">do</span>
+  sed (<span class="st">&quot;* &quot;</span> <span class="fu">*&gt;</span> return <span class="st">&quot;&quot;</span>) <span class="fu">$</span> grep (prefix <span class="st">&quot;*&quot;</span>) (git <span class="st">&quot;branch&quot;</span> [<span class="st">&quot;--list&quot;</span>])</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="fu">*</span><span class="dt">Main</span> <span class="dt">GitHellLib</span><span class="fu">&gt;</span> stdout currentBranch
+master</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">ghc-mod</span>$ git branch --list
+  <span class="kw">ghc-8</span>
+<span class="kw">*</span> master
+<span class="kw">ghc-mod</span>$ git branch <span class="kw">2&gt;</span>/dev/null <span class="kw">|</span> <span class="kw">grep</span> <span class="st">'\*'</span> <span class="kw">|</span> <span class="kw">cut</span> -d<span class="st">'*'</span> -f2-<span class="kw">|sed</span> -e <span class="st">'s/^\s*//g'</span>
+<span class="kw">master</span></code></pre></div>
+</div>
 </body>
 </html>
