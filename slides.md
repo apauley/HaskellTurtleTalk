@@ -34,7 +34,7 @@
 # Haskell for Shell Scripting? Why?
 
  * A high-level language that can compile to command-line executables.
- * Scripts can also be interpreted if you don't want to compile them.
+ * Scripts can also be run from source if you don't want to compile them.
  * Bringing the awesomeness of typed functional programming to your scripts
 
 # Installing Turtle
@@ -109,7 +109,7 @@ sys	0m0.003s
 main = do
   selfContained <- options "Generate the slides as html" parser
   let baseArgs = ["-t", "slidy", "-s", "slides.md", "-o", "slides.html"]
-  let args = if (selfContained) then "--self-contained":baseArgs else baseArgs
+  let args = if selfContained then "--self-contained":baseArgs else baseArgs
   proc "pandoc" args empty
 
 parser :: Parser Bool

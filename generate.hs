@@ -11,7 +11,7 @@ import Turtle
 main = do
   selfContained <- options "Generate the slides as html" parser
   let baseArgs = ["-t", "slidy", "-s", "slides.md", "-o", "slides.html"]
-  let args = if (selfContained) then "--self-contained":baseArgs else baseArgs
+  let args = if selfContained then "--self-contained":baseArgs else baseArgs
   proc "pandoc" args empty
 
 parser :: Parser Bool

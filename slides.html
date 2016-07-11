@@ -85,7 +85,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1>Haskell for Shell Scripting? Why?</h1>
 <ul>
 <li>A high-level language that can compile to command-line executables.</li>
-<li>Scripts can also be interpreted if you don't want to compile them.</li>
+<li>Scripts can also be run from source if you don't want to compile them.</li>
 <li>Bringing the awesomeness of typed functional programming to your scripts</li>
 </ul>
 </div>
@@ -142,7 +142,7 @@ $ <span class="kw">time</span> ./example
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">main <span class="fu">=</span> <span class="kw">do</span>
   selfContained <span class="ot">&lt;-</span> options <span class="st">&quot;Generate the slides as html&quot;</span> parser
   <span class="kw">let</span> baseArgs <span class="fu">=</span> [<span class="st">&quot;-t&quot;</span>, <span class="st">&quot;slidy&quot;</span>, <span class="st">&quot;-s&quot;</span>, <span class="st">&quot;slides.md&quot;</span>, <span class="st">&quot;-o&quot;</span>, <span class="st">&quot;slides.html&quot;</span>]
-  <span class="kw">let</span> args <span class="fu">=</span> <span class="kw">if</span> (selfContained) <span class="kw">then</span> <span class="st">&quot;--self-contained&quot;</span><span class="fu">:</span>baseArgs <span class="kw">else</span> baseArgs
+  <span class="kw">let</span> args <span class="fu">=</span> <span class="kw">if</span> selfContained <span class="kw">then</span> <span class="st">&quot;--self-contained&quot;</span><span class="fu">:</span>baseArgs <span class="kw">else</span> baseArgs
   proc <span class="st">&quot;pandoc&quot;</span> args empty
 
 <span class="ot">parser ::</span> <span class="dt">Parser</span> <span class="dt">Bool</span>
