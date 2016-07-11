@@ -339,8 +339,8 @@ turtle<span class="fu">-</span>out<span class="fu">:</span> <span class="dt">MM<
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> stdout <span class="fu">$</span> fmap (either (format (<span class="st">&quot;turtle-err: &quot;</span><span class="fu">%</span>s)) (format (<span class="st">&quot;turtle-out: &quot;</span><span class="fu">%</span>s))) shellEither
 turtle<span class="fu">-</span>err<span class="fu">:</span> fatal<span class="fu">:</span> <span class="dt">Not</span> a git repository (or any <span class="kw">of</span> the parent directories)<span class="fu">:</span> <span class="fu">.</span>git</code></pre></div>
 </div>
-<div id="string-formatting" class="slide section level1">
-<h1>String Formatting</h1>
+<div id="basic-text-formatting" class="slide section level1">
+<h1>Basic Text Formatting</h1>
 <h2 id="text-and-int">Text and Int</h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d) cmd n</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d)
@@ -353,6 +353,12 @@ FilePath <span class="st">&quot;/bin&quot;</span>
 <span class="st">&quot;Your current directory is /bin&quot;</span>
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span>t format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)
 format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)<span class="ot"> ::</span> <span class="dt">Turtle.FilePath</span> <span class="ot">-&gt;</span> <span class="dt">Text</span></code></pre></div>
+</div>
+<div id="more-text-formatting" class="slide section level1">
+<h1>More Text Formatting</h1>
+<p>There are lots of predefined formatters available, e.g. <code>Double</code>, <code>UTCTime</code>, any <code>Show</code>able value etc.</p>
+<p>Or create your own format specifier with <code>makeFormat</code>:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">makeFormat ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Text</span>) <span class="ot">-&gt;</span> <span class="dt">Format</span> r (a <span class="ot">-&gt;</span> r)</code></pre></div>
 </div>
 <div id="comparing-a-ruby-script" class="slide section level1">
 <h1>Comparing a Ruby Script</h1>

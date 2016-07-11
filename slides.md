@@ -415,7 +415,7 @@ Prelude Turtle> stdout $ fmap (either (format ("turtle-err: "%s)) (format ("turt
 turtle-err: fatal: Not a git repository (or any of the parent directories): .git
 ```
 
-# String Formatting
+# Basic Text Formatting
 
 ## Text and Int
 
@@ -438,6 +438,17 @@ Prelude Turtle> format ("Your current directory is "%fp) myDir
 "Your current directory is /bin"
 Prelude Turtle> :t format ("Your current directory is "%fp)
 format ("Your current directory is "%fp) :: Turtle.FilePath -> Text
+```
+
+# More Text Formatting
+
+There are lots of predefined formatters available,
+e.g. `Double`, `UTCTime`, any `Show`able value etc.
+
+Or create your own format specifier with `makeFormat`:
+
+```haskell
+makeFormat :: (a -> Text) -> Format r (a -> r)
 ```
 
 # Comparing a Ruby Script
