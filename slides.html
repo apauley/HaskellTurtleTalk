@@ -329,10 +329,11 @@ turtle<span class="fu">-</span>err<span class="fu">:</span> fatal<span class="fu
 </div>
 <div id="string-formatting" class="slide section level1">
 <h1>String Formatting</h1>
+<h2 id="text-and-int">Text and Int</h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d) cmd n</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span><span class="kw">type</span> format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d)
 format (s<span class="fu">%</span><span class="st">&quot; failed with exit code: &quot;</span><span class="fu">%</span>d)<span class="ot"> ::</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Text</span></code></pre></div>
-<h2 id="formatting-filepath">Formatting FilePath</h2>
+<h2 id="filepath">FilePath</h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> pwd
 FilePath <span class="st">&quot;/bin&quot;</span>
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> myDir <span class="ot">&lt;-</span> pwd
@@ -340,6 +341,133 @@ FilePath <span class="st">&quot;/bin&quot;</span>
 <span class="st">&quot;Your current directory is /bin&quot;</span>
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="fu">:</span>t format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)
 format (<span class="st">&quot;Your current directory is &quot;</span><span class="fu">%</span>fp)<span class="ot"> ::</span> <span class="dt">Turtle.FilePath</span> <span class="ot">-&gt;</span> <span class="dt">Text</span></code></pre></div>
+</div>
+<div id="comparing-a-ruby-script" class="slide section level1">
+<h1>Comparing a Ruby Script</h1>
+<div class="sourceCode"><pre class="sourceCode ruby"><code class="sourceCode ruby">checker_zip = <span class="st">'dependency-check-1.4.0-release.zip'</span>
+checker_md5 = <span class="st">'0c06c24fda0db873665f5a8be6681c00'</span>
+
+<span class="kw">def</span> fetch_file(base_url, filename)
+  url = <span class="st">&quot;</span><span class="ot">#{</span>base_url<span class="ot">}</span><span class="st">/</span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st">&quot;</span>
+  <span class="st">`rm -f </span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st">`</span>
+  cmd = <span class="st">&quot;wget </span><span class="ot">#{</span>url<span class="ot">}</span><span class="st">&quot;</span>
+  puts <span class="st">&quot;Fetching </span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st"> from </span><span class="ot">#{</span>url<span class="ot">}</span><span class="st">&quot;</span>
+  puts cmd
+  system cmd
+<span class="kw">end</span>
+
+<span class="kw">def</span> assert_md5(filename, expected_md5)
+  md5 = <span class="st">`md5sum </span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st">`</span>.split()[<span class="dv">0</span>]
+  <span class="kw">if</span> md5 != expected_md5
+    abort <span class="st">&quot;Incorrect md5 sum for </span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st">\n\nExpected:\n</span><span class="ot">#{</span>expected_md5<span class="ot">}</span><span class="st">\n\nFound:\n</span><span class="ot">#{</span>md5<span class="ot">}</span><span class="st">&quot;</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">def</span> unzip(filename)
+  cmd = <span class="st">&quot;unzip -o </span><span class="ot">#{</span>filename<span class="ot">}</span><span class="st">&quot;</span>
+  puts cmd
+  system cmd
+<span class="kw">end</span>
+
+<span class="kw">def</span> run_dependency_check(stage_lib)
+  script = <span class="st">'./dependency-check/bin/dependency-check.sh'</span>
+  cmd = <span class="st">&quot;</span><span class="ot">#{</span>script<span class="ot">}</span><span class="st"> --format ALL --project 'Project Name' --scan \&quot;</span><span class="ot">#{</span>stage_lib<span class="ot">}</span><span class="st">/*.jar\&quot;&quot;</span>
+  puts cmd
+  system cmd
+<span class="kw">end</span>
+
+<span class="kw">def</span> assert_report_exists
+  report_file = <span class="st">'dependency-check-report.html'</span>
+  <span class="kw">if</span> <span class="dt">File</span>.exist? report_file
+    puts <span class="st">&quot;\nThe report has been generated:&quot;</span>
+    system <span class="st">'ls -lh dependency-check-*.*ml'</span>
+  <span class="kw">else</span>
+    abort <span class="st">&quot;</span><span class="ot">#{</span>report_file<span class="ot">}</span><span class="st"> not found&quot;</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">def</span> analyze_report
+  cmd = <span class="st">&quot;cat dependency-check-report.xml|grep '&lt;severity&gt;.*&lt;/severity&gt;'|cut -d'&gt;' -f2|cut -d'&lt;' -f1|sort|uniq&quot;</span>
+  puts cmd
+  out = <span class="st">`</span><span class="ot">#{</span>cmd<span class="ot">}</span><span class="st">`</span>
+  puts <span class="st">&quot;</span><span class="ot">#{</span>out<span class="ot">}</span><span class="st">\n&quot;</span>
+
+  <span class="kw">if</span> out.include? <span class="st">'High'</span>
+    abort <span class="st">'ERROR: There are high severity vulnerabilities'</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">if</span> !<span class="dt">File</span>.exist? checker_zip
+  fetch_file(<span class="st">&quot;http://dl.bintray.com/jeremy-long/owasp&quot;</span>, checker_zip)
+<span class="kw">end</span>
+
+assert_md5(checker_zip, checker_md5)
+unzip checker_zip
+
+stage_lib = <span class="st">'./lib'</span>
+run_dependency_check stage_lib
+
+assert_report_exists
+
+analyze_report</code></pre></div>
+</div>
+<div id="comparing-a-ruby-script---turtle-version" class="slide section level1">
+<h1>Comparing a Ruby Script - Turtle Version</h1>
+<p><a href="https://github.com/apauley/hsh/blob/master/src/HSHOwaspLib.hs" class="uri">https://github.com/apauley/hsh/blob/master/src/HSHOwaspLib.hs</a></p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">checkerZip <span class="fu">=</span> <span class="st">&quot;dependency-check-1.4.0-release.zip&quot;</span>
+checkerMD5 <span class="fu">=</span> <span class="st">&quot;0c06c24fda0db873665f5a8be6681c00&quot;</span>
+
+downloadUrl <span class="fu">=</span> format (<span class="st">&quot;http://dl.bintray.com/jeremy-long/owasp/&quot;</span><span class="fu">%</span>fp) checkerZip
+
+xmlReport <span class="fu">=</span> <span class="st">&quot;dependency-check-report.xml&quot;</span>
+reportFiles <span class="fu">=</span> xmlReport<span class="fu">:</span>[<span class="st">&quot;dependency-check-report.html&quot;</span>, <span class="st">&quot;dependency-check-vulnerability.html&quot;</span>]
+
+<span class="co">-- main = owaspCheck projectName scanDir</span>
+<span class="ot">owaspCheck ::</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+owaspCheck project path <span class="fu">=</span> <span class="kw">do</span>
+  zip <span class="ot">&lt;-</span> localZip
+  extractZipFile zip
+  deleteReports
+  scandir <span class="ot">&lt;-</span> realpath path
+  runDependencyCheck project scandir
+
+<span class="ot">runDependencyCheck ::</span> <span class="dt">Text</span> <span class="ot">-&gt;</span> FilePath <span class="ot">-&gt;</span> <span class="dt">IO</span> ()
+runDependencyCheck project scandir <span class="fu">=</span> <span class="kw">do</span>
+  <span class="kw">let</span> files <span class="fu">=</span> format (fp<span class="fu">%</span><span class="st">&quot;/**/*&quot;</span>) scandir
+  <span class="kw">let</span> cmd <span class="fu">=</span> <span class="st">&quot;./dependency-check/bin/dependency-check.sh&quot;</span>
+  <span class="kw">let</span> args <span class="fu">=</span> [<span class="st">&quot;--format&quot;</span>, <span class="st">&quot;ALL&quot;</span>, <span class="st">&quot;--project&quot;</span>, project, <span class="st">&quot;--scan&quot;</span>, files]
+  echoFlush <span class="fu">$</span> T.intercalate <span class="st">&quot; &quot;</span> <span class="fu">$</span> cmd <span class="fu">:</span> args
+  procs cmd args empty
+  analyzeReport
+
+<span class="ot">analyzeReport ::</span> <span class="dt">IO</span> ()
+analyzeReport <span class="fu">=</span> <span class="kw">do</span>
+  <span class="kw">let</span> cmd <span class="fu">=</span> format (<span class="st">&quot;cat &quot;</span><span class="fu">%</span>fp<span class="fu">%</span><span class="st">&quot;|grep '&lt;severity&gt;.*&lt;/severity&gt;'|cut -d'&gt;' -f2|cut -d'&lt;' -f1|sort|uniq&quot;</span>) xmlReport
+  echoFlush cmd
+  (exitCode, output) <span class="ot">&lt;-</span> shellStrict cmd empty
+  echoFlush <span class="fu">$</span> format (<span class="st">&quot;Report output:\n&quot;</span><span class="fu">%</span>s) output
+  <span class="kw">let</span> highCount <span class="fu">=</span> T.count <span class="st">&quot;High&quot;</span> output
+  <span class="kw">if</span> (highCount <span class="fu">&gt;</span> <span class="dv">0</span>)
+    <span class="kw">then</span> die <span class="st">&quot;ERROR: There are high severity vulnerabilities&quot;</span>
+    <span class="kw">else</span> <span class="kw">if</span> (T.null output)
+         <span class="kw">then</span> die <span class="st">&quot;ERROR: The dependency checker produced an empty report&quot;</span>
+    <span class="kw">else</span> return ()
+
+<span class="ot">localZip ::</span> <span class="dt">IO</span> FilePath
+localZip <span class="fu">=</span> <span class="kw">do</span>
+  downloaded <span class="ot">&lt;-</span> testfile checkerZip
+  <span class="kw">if</span> downloaded
+    <span class="kw">then</span> assertMD5 checkerZip checkerMD5
+    <span class="kw">else</span> downloadDependencyCheck
+
+<span class="ot">downloadDependencyCheck ::</span> <span class="dt">IO</span> FilePath
+downloadDependencyCheck <span class="fu">=</span> <span class="kw">do</span>
+  procs <span class="st">&quot;wget&quot;</span> [downloadUrl] empty
+  assertMD5 checkerZip checkerMD5
+
+deleteReports <span class="fu">=</span> <span class="kw">do</span>
+  <span class="kw">let</span> [r1,r2,r3] <span class="fu">=</span> reportFiles
+  rmIfExists r1; rmIfExists r2; rmIfExists r3</code></pre></div>
 </div>
 <div id="resources" class="slide section level1">
 <h1>Resources</h1>

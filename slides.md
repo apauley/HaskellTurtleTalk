@@ -394,6 +394,8 @@ turtle-err: fatal: Not a git repository (or any of the parent directories): .git
 
 # String Formatting
 
+## Text and Int
+
 ```haskell
 format (s%" failed with exit code: "%d) cmd n
 ```
@@ -403,7 +405,7 @@ Prelude Turtle> :type format (s%" failed with exit code: "%d)
 format (s%" failed with exit code: "%d) :: Text -> Int -> Text
 ```
 
-## Formatting FilePath
+## FilePath
 
 ```haskell
 Prelude Turtle> pwd
@@ -413,6 +415,139 @@ Prelude Turtle> format ("Your current directory is "%fp) myDir
 "Your current directory is /bin"
 Prelude Turtle> :t format ("Your current directory is "%fp)
 format ("Your current directory is "%fp) :: Turtle.FilePath -> Text
+```
+
+# Comparing a Ruby Script
+
+```ruby
+checker_zip = 'dependency-check-1.4.0-release.zip'
+checker_md5 = '0c06c24fda0db873665f5a8be6681c00'
+
+def fetch_file(base_url, filename)
+  url = "#{base_url}/#{filename}"
+  `rm -f #{filename}`
+  cmd = "wget #{url}"
+  puts "Fetching #{filename} from #{url}"
+  puts cmd
+  system cmd
+end
+
+def assert_md5(filename, expected_md5)
+  md5 = `md5sum #{filename}`.split()[0]
+  if md5 != expected_md5
+    abort "Incorrect md5 sum for #{filename}\n\nExpected:\n#{expected_md5}\n\nFound:\n#{md5}"
+  end
+end
+
+def unzip(filename)
+  cmd = "unzip -o #{filename}"
+  puts cmd
+  system cmd
+end
+
+def run_dependency_check(stage_lib)
+  script = './dependency-check/bin/dependency-check.sh'
+  cmd = "#{script} --format ALL --project 'Project Name' --scan \"#{stage_lib}/*.jar\""
+  puts cmd
+  system cmd
+end
+
+def assert_report_exists
+  report_file = 'dependency-check-report.html'
+  if File.exist? report_file
+    puts "\nThe report has been generated:"
+    system 'ls -lh dependency-check-*.*ml'
+  else
+    abort "#{report_file} not found"
+  end
+end
+
+def analyze_report
+  cmd = "cat dependency-check-report.xml|grep '<severity>.*</severity>'|cut -d'>' -f2|cut -d'<' -f1|sort|uniq"
+  puts cmd
+  out = `#{cmd}`
+  puts "#{out}\n"
+
+  if out.include? 'High'
+    abort 'ERROR: There are high severity vulnerabilities'
+  end
+end
+
+if !File.exist? checker_zip
+  fetch_file("http://dl.bintray.com/jeremy-long/owasp", checker_zip)
+end
+
+assert_md5(checker_zip, checker_md5)
+unzip checker_zip
+
+stage_lib = './lib'
+run_dependency_check stage_lib
+
+assert_report_exists
+
+analyze_report
+```
+
+
+# Comparing a Ruby Script - Turtle Version
+
+[https://github.com/apauley/hsh/blob/master/src/HSHOwaspLib.hs](https://github.com/apauley/hsh/blob/master/src/HSHOwaspLib.hs)
+
+```haskell
+checkerZip = "dependency-check-1.4.0-release.zip"
+checkerMD5 = "0c06c24fda0db873665f5a8be6681c00"
+
+downloadUrl = format ("http://dl.bintray.com/jeremy-long/owasp/"%fp) checkerZip
+
+xmlReport = "dependency-check-report.xml"
+reportFiles = xmlReport:["dependency-check-report.html", "dependency-check-vulnerability.html"]
+
+-- main = owaspCheck projectName scanDir
+owaspCheck :: Text -> FilePath -> IO ()
+owaspCheck project path = do
+  zip <- localZip
+  extractZipFile zip
+  deleteReports
+  scandir <- realpath path
+  runDependencyCheck project scandir
+
+runDependencyCheck :: Text -> FilePath -> IO ()
+runDependencyCheck project scandir = do
+  let files = format (fp%"/**/*") scandir
+  let cmd = "./dependency-check/bin/dependency-check.sh"
+  let args = ["--format", "ALL", "--project", project, "--scan", files]
+  echoFlush $ T.intercalate " " $ cmd : args
+  procs cmd args empty
+  analyzeReport
+
+analyzeReport :: IO ()
+analyzeReport = do
+  let cmd = format ("cat "%fp%"|grep '<severity>.*</severity>'|cut -d'>' -f2|cut -d'<' -f1|sort|uniq") xmlReport
+  echoFlush cmd
+  (exitCode, output) <- shellStrict cmd empty
+  echoFlush $ format ("Report output:\n"%s) output
+  let highCount = T.count "High" output
+  if (highCount > 0)
+    then die "ERROR: There are high severity vulnerabilities"
+    else if (T.null output)
+         then die "ERROR: The dependency checker produced an empty report"
+    else return ()
+
+localZip :: IO FilePath
+localZip = do
+  downloaded <- testfile checkerZip
+  if downloaded
+    then assertMD5 checkerZip checkerMD5
+    else downloadDependencyCheck
+
+downloadDependencyCheck :: IO FilePath
+downloadDependencyCheck = do
+  procs "wget" [downloadUrl] empty
+  assertMD5 checkerZip checkerMD5
+
+deleteReports = do
+  let [r1,r2,r3] = reportFiles
+  rmIfExists r1; rmIfExists r2; rmIfExists r3
 ```
 
 # Resources
