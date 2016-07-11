@@ -286,17 +286,15 @@ master</code></pre></div>
 </div>
 <div id="executing-arbitrary-commands" class="slide section level1">
 <h1>Executing Arbitrary Commands</h1>
-<ul>
-<li>When built-in functions don't cut it anymore</li>
-</ul>
+<p><strong>When built-in functions don't cut it anymore</strong></p>
 <p>There are two main categories of functions here:</p>
-<h2 id="those-with-the-word-shell-e.g.-shellstrict">1. Those with the word <code>shell</code>, e.g. <code>shellStrict</code></h2>
+<h2 id="those-from-the-shell-family-e.g.-shellstrict">1. Those from the <code>shell</code> family, e.g. <code>shellStrict</code></h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">shellStrict
 <span class="ot">::</span> <span class="dt">MonadIO</span> io
 <span class="ot">=&gt;</span> <span class="dt">Text</span>                <span class="co">-- Command line</span>
 <span class="ot">-&gt;</span> <span class="dt">Shell</span> <span class="dt">Text</span>          <span class="co">-- Lines of standard input</span>
 <span class="ot">-&gt;</span> io (<span class="dt">ExitCode</span>, <span class="dt">Text</span>) <span class="co">-- Exit code and stdout</span></code></pre></div>
-<h2 id="those-with-the-word-proc-e.g.-inprocwitherr">2. Those with the word <code>proc</code>, e.g. <code>inprocWithErr</code></h2>
+<h2 id="those-from-the-proc-family-e.g.-inprocwitherr">2. Those from the <code>proc</code> family, e.g. <code>inprocWithErr</code></h2>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">inprocWithErr
 <span class="ot">::</span> <span class="dt">Text</span>                     <span class="co">-- Command</span>
 <span class="ot">-&gt;</span> [<span class="dt">Text</span>]                   <span class="co">-- Arguments</span>
@@ -306,18 +304,32 @@ master</code></pre></div>
 </div>
 <div id="shell-and-family" class="slide section level1">
 <h1>shell and family</h1>
-<p>More powerful, but less safe. You can include any shell command, with shell pipes etc:</p>
+<p>More power, less safety. You can include any shell command, with shell pipes etc.</p>
+<h3 id="return-values">Return values:</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">shell          ::</span> <span class="dt">IO</span> <span class="dt">ExitCode</span>
+<span class="ot">shells         ::</span> <span class="dt">IO</span> ()                    <span class="co">-- like `shell`, but throws error on ExitFailure</span>
+<span class="ot">shellStrict    ::</span> <span class="dt">IO</span> (<span class="dt">ExitCode</span>, <span class="dt">Text</span>)      <span class="co">-- You get stdout, but stderr is not in your control.</span>
+<span class="ot">inshell        ::</span> <span class="dt">Shell</span> <span class="dt">Text</span>               <span class="co">-- Stream stdout, but stderr is not in your control.</span>
+<span class="ot">inshellWithErr ::</span> <span class="dt">Shell</span> (<span class="dt">Either</span> <span class="dt">Text</span> <span class="dt">Text</span>) <span class="co">-- Stream both stdout and stderr</span></code></pre></div>
+<h3 id="examples">Examples:</h3>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> shell <span class="st">&quot;cat /etc/hosts|grep 127.0.0.1.*localhost&quot;</span> empty
 <span class="fl">127.0</span><span class="fu">.</span><span class="fl">0.1</span>   localhost
 <span class="dt">ExitSuccess</span>
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> shell <span class="st">&quot;cat /etc/hosts|grep NASA&quot;</span> empty
 <span class="dt">ExitFailure</span> <span class="dv">1</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">  <span class="kw">let</span> cmd <span class="fu">=</span> <span class="st">&quot;cat dependency-check-report.xml|grep '&lt;severity&gt;.*&lt;/severity&gt;'|cut -d'&gt;' -f2|cut -d'&lt;' -f1|sort|uniq&quot;</span>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">  <span class="kw">let</span> cmd <span class="fu">=</span> <span class="st">&quot;cat report.xml|grep '&lt;severity&gt;.*&lt;/severity&gt;'|cut -d'&gt;' -f2|cut -d'&lt;' -f1|sort|uniq&quot;</span>
   (exitCode, output) <span class="ot">&lt;-</span> shellStrict cmd empty</code></pre></div>
 </div>
 <div id="proc-and-family" class="slide section level1">
 <h1>proc and family</h1>
-<p>Safer, but less powerful. You supply arguments as a list of <code>Text</code>:</p>
+<p>More safety, less power. You supply arguments as a list of <code>Text</code>.</p>
+<h3 id="return-values-1">Return values:</h3>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">proc          ::</span> <span class="dt">IO</span> <span class="dt">ExitCode</span>
+<span class="ot">procs         ::</span> <span class="dt">IO</span> ()                    <span class="co">-- like `proc`, but throws error on ExitFailure</span>
+<span class="ot">procStrict    ::</span> <span class="dt">IO</span> (<span class="dt">ExitCode</span>, <span class="dt">Text</span>)      <span class="co">-- You get stdout, but stderr is not in your control.</span>
+<span class="ot">inproc        ::</span> <span class="dt">Shell</span> <span class="dt">Text</span>               <span class="co">-- Stream stdout, but stderr is not in your control.</span>
+<span class="ot">inprocWithErr ::</span> <span class="dt">Shell</span> (<span class="dt">Either</span> <span class="dt">Text</span> <span class="dt">Text</span>) <span class="co">-- Stream both stdout and stderr</span></code></pre></div>
+<h3 id="examples-1">Examples:</h3>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">exitCode <span class="ot">&lt;-</span> proc <span class="st">&quot;pandoc&quot;</span> [<span class="st">&quot;-t&quot;</span>, <span class="st">&quot;slidy&quot;</span>, <span class="st">&quot;-s&quot;</span>, <span class="st">&quot;slides.md&quot;</span>, <span class="st">&quot;-o&quot;</span>, <span class="st">&quot;slides.html&quot;</span>] empty</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> <span class="kw">let</span> procEither <span class="fu">=</span> inprocWithErr <span class="st">&quot;git&quot;</span> [<span class="st">&quot;status&quot;</span>, <span class="st">&quot;--short&quot;</span>] empty
 <span class="dt">Prelude</span> <span class="dt">Turtle</span><span class="fu">&gt;</span> stdout <span class="fu">$</span> fmap (either (format (<span class="st">&quot;turtle-err: &quot;</span><span class="fu">%</span>s)) (format (<span class="st">&quot;turtle-out: &quot;</span><span class="fu">%</span>s))) shellEither
@@ -473,8 +485,10 @@ deleteReports <span class="fu">=</span> <span class="kw">do</span>
 <h1>Resources</h1>
 <p>The Turtle Tutorial:</p>
 <p><a href="https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html" class="uri">https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html</a></p>
-<p>The GitHub Repository:</p>
+<p>The Turtle GitHub Repository:</p>
 <p><a href="https://github.com/Gabriel439/Haskell-Turtle-Library" class="uri">https://github.com/Gabriel439/Haskell-Turtle-Library</a></p>
+<p>This Talk:</p>
+<p><a href="https://github.com/apauley/HaskellTurtleTalk" class="uri">https://github.com/apauley/HaskellTurtleTalk</a></p>
 </div>
 </body>
 </html>

@@ -329,11 +329,11 @@ master
 
 # Executing Arbitrary Commands
 
- * When built-in functions don't cut it anymore
+**When built-in functions don't cut it anymore**
 
 There are two main categories of functions here:
 
-## 1. Those with the word `shell`, e.g. `shellStrict`
+## 1. Those from the `shell` family, e.g. `shellStrict`
 
 ```haskell
 shellStrict
@@ -343,7 +343,7 @@ shellStrict
 -> io (ExitCode, Text) -- Exit code and stdout
 ```
 
-## 2. Those with the word `proc`, e.g. `inprocWithErr`
+## 2. Those from the `proc` family, e.g. `inprocWithErr`
 
 ```haskell
 inprocWithErr
@@ -357,8 +357,19 @@ The `proc`-style functions are safer, the `shell`-style functions are more power
 
 # shell and family
 
-More powerful, but less safe.
-You can include any shell command, with shell pipes etc:
+More power, less safety.
+You can include any shell command, with shell pipes etc.
+
+### Return values:
+```haskell
+shell          :: IO ExitCode
+shells         :: IO ()                    -- like `shell`, but throws error on ExitFailure
+shellStrict    :: IO (ExitCode, Text)      -- You get stdout, but stderr is not in your control.
+inshell        :: Shell Text               -- Stream stdout, but stderr is not in your control.
+inshellWithErr :: Shell (Either Text Text) -- Stream both stdout and stderr
+```
+
+### Examples:
 
 ```haskell
 Prelude Turtle> shell "cat /etc/hosts|grep 127.0.0.1.*localhost" empty
@@ -369,14 +380,26 @@ ExitFailure 1
 ```
 
 ```haskell
-  let cmd = "cat dependency-check-report.xml|grep '<severity>.*</severity>'|cut -d'>' -f2|cut -d'<' -f1|sort|uniq"
+  let cmd = "cat report.xml|grep '<severity>.*</severity>'|cut -d'>' -f2|cut -d'<' -f1|sort|uniq"
   (exitCode, output) <- shellStrict cmd empty
 ```
 
 # proc and family
 
-Safer, but less powerful.
-You supply arguments as a list of `Text`:
+More safety, less power.
+You supply arguments as a list of `Text`.
+
+### Return values:
+
+```haskell
+proc          :: IO ExitCode
+procs         :: IO ()                    -- like `proc`, but throws error on ExitFailure
+procStrict    :: IO (ExitCode, Text)      -- You get stdout, but stderr is not in your control.
+inproc        :: Shell Text               -- Stream stdout, but stderr is not in your control.
+inprocWithErr :: Shell (Either Text Text) -- Stream both stdout and stderr
+```
+
+### Examples:
 
 ```haskell
 exitCode <- proc "pandoc" ["-t", "slidy", "-s", "slides.md", "-o", "slides.html"] empty
@@ -556,6 +579,10 @@ The Turtle Tutorial:
 
 [https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html](https://hackage.haskell.org/package/turtle/docs/Turtle-Tutorial.html)
 
-The GitHub Repository:
+The Turtle GitHub Repository:
 
 [https://github.com/Gabriel439/Haskell-Turtle-Library](https://github.com/Gabriel439/Haskell-Turtle-Library)
+
+This Talk:
+
+[https://github.com/apauley/HaskellTurtleTalk](https://github.com/apauley/HaskellTurtleTalk)
